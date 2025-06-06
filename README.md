@@ -8,14 +8,14 @@ Actividad 17
 ## 🔗 URL del Repositorio
 https://github.com/Zaloooo16/Mantenimiento-en-un-entorno-de-software-AppScript-
 
-## 📌 Objetivo
+##  Objetivo
 Automatizar el envío profesional de recordatorios de reuniones con:
 - ✉️ Emails HTML responsivos con branding corporativo
 - 📅 Creación automática de eventos en Google Calendar
 - 📊 Registro en Google Sheets para auditoría
 - ✅ Validación de datos en tiempo real
 
-## 🚀 Características Principales
+##  Características Principales
 ```javascript
 function enviarRecordatorio(datos) {
   // 1. Validación inteligente
@@ -31,3 +31,11 @@ function enviarRecordatorio(datos) {
   logActivity(datos);
 }
 
+## Refactorización Realizada
+Problemas Detectados (Before)
+Código monolítico: Función principal con 200+ líneas
+
+Validaciones frágiles:
+// Problema: Validación dispersa
+if (!datos.email) { /* ... */ }
+if (!/^.../.test(datos.hora)) { /* ... */ }
