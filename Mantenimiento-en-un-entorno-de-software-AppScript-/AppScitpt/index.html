@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <base target="_top">
+  <title>Sistema de Recordatorios</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  
+  <!-- Font Awesome CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- SweetAlert2 CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.20/sweetalert2.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.20/sweetalert2.min.css">
+  
+  <!-- Google Fonts -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap">
+
+  <style>
+    :root {
+      --color-white: #f9f7f2;
+      --color-dark-green: #5d6852;
+      --color-olive: #7d8570;
+      --color-taupe: #a69986;
+      --color-light-taupe: #c0b09f;
+      --color-error: #d93025;
+      --color-accent: #a3c1ad;
+      --color-accent-light: #d7e4dc;
+      --color-text: #333333;
+      --color-gradient-start: #5d6852;
+      --color-gradient-end: #7d8570;
+      --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.08);
+      --shadow-hover: 0 15px 35px rgba(0, 0, 0, 0.12);
+      --transition-standard: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Montserrat', sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 30px 20px;
+      line-height: 1.6;
+      background-color: var(--color-white);
+      color: var(--color-text);
+      background-image: linear-gradient(135deg, #f9f7f2 0%, #eae5d6 100%);
+      background-attachment: fixed;
+      min-height: 100vh;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid var(--color-accent);
+      animation: fadeIn 1s ease;
+    }
+    
+    .logo-container {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 15px;
+    }
+    
+    .logo {
+      max-width: 220px;
+      height: auto;
+      transition: var(--transition-standard);
+      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+    }
+    
+    .logo-shine {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg, 
+        rgba(255,255,255,0) 0%, 
+        rgba(255,255,255,0.4) 50%, 
+        rgba(255,255,255,0) 100%
+      );
+      animation: shine 3s infinite;
+      transform: skewX(-20deg);
+    }
+    
+    h1 {
+      color: var(--color-dark-green);
+      margin-top: 0;
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    }
+    
+    h1 i {
+      margin-right: 10px;
+      color: var(--color-olive);
+    }
+    
+    .subtitle {
+      color: var(--color-taupe);
+      font-size: 16px;
+      font-weight: 500;
+      margin-top: 5px;
+    }
+    
+    .container {
+      background: var(--color-white);
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(166, 153, 134, 0.2);
+      margin-bottom: 30px;
+      transition: var(--transition-standard);
+      transform: translateY(0);
+      animation: slideUp 0.6s ease;
+    }
+    
+    .container:hover {
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-5px);
+    }
+    
+    .form-group {
+      margin-bottom: 25px;
+      position: relative;
+    }
+    
+    .form-group:last-of-type {
+      margin-bottom: 35px;
+    }
+    
+    .form-icon {
+      position: absolute;
+      left: 12px;
+      top: 40px;
+      color: var(--color-olive);
+      font-size: 18px;
+      z-index: 2;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: 600;
+      color: var(--color-dark-green);
+      font-size: 15px;
+      transition: var(--transition-standard);
+    }
+    
+    input, select {
+      width: 100%;
+      padding: 14px 14px 14px 40px;
+      border: 2px solid var(--color-light-taupe);
+      border-radius: 10px;
+      box-sizing: border-box;
+      background-color: var(--color-white);
+      font-size: 15px;
+      font-family: 'Montserrat', sans-serif;
+      transition: var(--transition-standard);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
+    }
+    
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 3px rgba(163, 193, 173, 0.3);
+    }
+    
+    .form-group:focus-within label {
+      color: var(--color-accent);
+    }
+    
+    .form-group:focus-within .form-icon {
+      color: var(--color-accent);
+    }
+    
+    button {
+      background: linear-gradient(135deg, var(--color-gradient-start), var(--color-gradient-end));
+      color: var(--color-white);
+      border: none;
+      padding: 16px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      width: 100%;
+      margin-top: 20px;
+      transition: var(--transition-standard);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(93, 104, 82, 0.3);
+      font-family: 'Montserrat', sans-serif;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(93, 104, 82, 0.4);
+    }
+    
+    button:active {
+      transform: translateY(-1px);
+    }
+    
+    button:disabled {
+      background: linear-gradient(135deg, #bdc3b7, #c0c7ba);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    button i {
+      margin-right: 10px;
+    }
+    
+    button::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: 0.5s;
+    }
+    
+    button:hover::after {
+      left: 100%;
+    }
+    
+    #result {
+      margin-top: 25px;
+      padding: 20px;
+      border-radius: 10px;
+      display: none;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: var(--color-white);
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 10px;
+    }
+    
+    .info-text {
+      font-size: 13px;
+      color: var(--color-taupe);
+      margin-top: 8px;
+      margin-left: 40px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .info-text i {
+      margin-right: 5px;
+      color: var(--color-olive);
+    }
+    
+    .required:after {
+      content: " *";
+      color: var(--color-error);
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    @keyframes shine {
+      0% { left: -100%; }
+      40% { left: 100%; }
+      100% { left: 100%; }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes slideUp {
+      from { 
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to { 
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes wiggle {
+      0%, 100% { transform: rotate(0deg); }
+      15% { transform: rotate(-5deg); }
+      30% { transform: rotate(5deg); }
+      45% { transform: rotate(-4deg); }
+      60% { transform: rotate(4deg); }
+      75% { transform: rotate(-2deg); }
+      85% { transform: rotate(2deg); }
+    }
+    
+    /* Estilos para el indicador de fortaleza de contraseña */
+    .floating-card {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: var(--shadow-soft);
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+      color: var(--color-dark-green);
+      z-index: 100;
+      transform: translateX(200%);
+      animation: slideIn 0.5s 1s forwards;
+    }
+    
+    .floating-card i {
+      margin-right: 10px;
+      font-size: 20px;
+      color: var(--color-accent);
+    }
+    
+    @keyframes slideIn {
+      to { transform: translateX(0); }
+    }
+    
+    .field-wrapper {
+      position: relative;
+    }
+    
+    .field-wrapper .hint {
+      position: absolute;
+      top: calc(100% + 5px);
+      left: 0;
+      background: var(--color-accent);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 12px;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s;
+      z-index: 10;
+    }
+    
+    .field-wrapper:focus-within .hint {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    /* Estilos para popup personalizado */
+    .custom-swal-container {
+      font-family: 'Montserrat', sans-serif;
+    }
+    
+    .custom-swal-popup {
+      border-radius: 16px;
+      box-shadow: var(--shadow-soft);
+    }
+    
+    .custom-swal-title {
+      color: var(--color-dark-green);
+      font-weight: 600;
+    }
+    
+    .custom-swal-content {
+      color: var(--color-text);
+    }
+    
+    .custom-swal-confirm {
+      background: linear-gradient(135deg, var(--color-gradient-start), var(--color-gradient-end));
+      border-radius: 8px;
+    }
+    
+    /* Responsive */
+    @media (max-width: 600px) {
+      body {
+        padding: 15px;
+      }
+      
+      .container {
+        padding: 25px;
+        border-radius: 12px;
+      }
+      
+      input, select {
+        padding: 12px 12px 12px 40px;
+      }
+      
+      .floating-card {
+        right: 10px;
+        bottom: 10px;
+        padding: 10px;
+        font-size: 12px;
+      }
+      
+      .floating-card i {
+        font-size: 16px;
+      }
+      
+      h1 {
+        font-size: 24px;
+      }
+    }
+    
+    /* Animaciones para SweetAlert2 */
+    .swal2-popup.swal2-toast {
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      border-radius: 30px;
+    }
+    
+    .swal2-icon {
+      border-radius: 50%;
+      animation: swalBounce 1s;
+    }
+    
+    @keyframes swalBounce {
+      0% { transform: scale(0.5); opacity: 0; }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    
+    /* Optimización de formulario */
+    .form-optimization {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    
+    .form-column {
+      flex: 1;
+      min-width: 250px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="header">
+    <div class="logo-container">
+      <img src="https://i.postimg.cc/qBDhkQ0y/logogonzalo.png" alt="Logo" class="logo">
+      <div class="logo-shine"></div>
+    </div>
+    <h1><i class="fas fa-calendar-check"></i>Sistema de Recordatorios</h1>
+    <p class="subtitle">Gestiona y envía recordatorios de reuniones de forma sencilla y eficiente</p>
+  </div>
+  
+  <div class="container">
+    <form id="recordatorioForm">
+      <div class="form-optimization">
+        <div class="form-column">
+          <div class="form-group">
+            <label for="nombre" class="required">Nombre del participante</label>
+            <div class="field-wrapper">
+              <i class="fas fa-user form-icon"></i>
+              <input type="text" id="nombre" name="nombre" required autocomplete="name">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="email" class="required">Correo electrónico</label>
+            <div class="field-wrapper">
+              <i class="fas fa-envelope form-icon"></i>
+              <input type="email" id="email" name="email" required autocomplete="email">
+              <p class="info-text"><i class="fas fa-info-circle"></i> Ejemplo: usuario@dominio.com</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-column">
+          <div class="form-group">
+            <label for="fecha" class="required">Fecha de la reunión</label>
+            <div class="field-wrapper">
+              <i class="fas fa-calendar-alt form-icon"></i>
+              <input type="date" id="fecha" name="fecha" required>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="hora" class="required">Hora de la reunión</label>
+            <div class="field-wrapper">
+              <i class="fas fa-clock form-icon"></i>
+              <input type="time" id="hora" name="hora" min="08:00" max="20:00" required>
+              <p class="info-text"><i class="fas fa-info-circle"></i> Horario: 08:00 - 20:00</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="asunto">Asunto de la reunión</label>
+        <div class="field-wrapper">
+          <i class="fas fa-pencil-alt form-icon"></i>
+          <input type="text" id="asunto" name="asunto" placeholder="Ej: Reunión de planificación trimestral">
+        </div>
+      </div>
+      
+      <button type="button" onclick="enviarRecordatorio()" id="submitBtn">
+        <i class="fas fa-paper-plane"></i>
+        <span id="buttonText">Enviar Recordatorio</span>
+      </button>
+    </form>
+  </div>
+  
+  <div class="floating-card">
+    <i class="fas fa-lightbulb"></i>
+    <span>Consejo: Completa todos los campos marcados con * para enviar el recordatorio.</span>
+  </div>
+
+  <script>
+    // Configuración SweetAlert2 personalizada
+    const Toast = Swal.mixin({
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+      },
+      customClass: {
+        container: 'custom-swal-container',
+        popup: 'custom-swal-popup',
+        title: 'custom-swal-title',
+        content: 'custom-swal-content',
+        confirmButton: 'custom-swal-confirm'
+      }
+    });
+
+    // Verificar permisos al cargar
+    function verificarPermisos() {
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (!result.hasSpreadsheetAccess) {
+            mostrarError("Error de permisos: No se puede acceder a la hoja de cálculo. Contacta al administrador.");
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error("Error al verificar permisos:", error);
+          mostrarError("No se pudo verificar los permisos de acceso.");
+        })
+        .verificarPermisos();
+    }
+    
+    function enviarRecordatorio() {
+      // Validar formulario
+      var form = document.getElementById('recordatorioForm');
+      if (!form.checkValidity()) {
+        Toast.fire({
+          icon: 'warning',
+          title: 'Por favor completa todos los campos requeridos'
+        });
+        form.reportValidity();
+        return;
+      }
+      
+      // Mostrar loading
+      Swal.fire({
+        title: 'Enviando recordatorio',
+        html: 'Espera un momento por favor...',
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        willOpen: () => {
+          Swal.showLoading();
+        }
+      });
+      
+      // Deshabilitar botón y mostrar spinner
+      var btn = document.getElementById('submitBtn');
+      var btnText = document.getElementById('buttonText');
+      btn.disabled = true;
+      btnText.innerHTML = '<span class="loading"></span> Enviando...';
+      
+      // Obtener datos del formulario
+      var datosReunion = {
+        nombre: document.getElementById('nombre').value.trim(),
+        email: document.getElementById('email').value.trim().toLowerCase(),
+        fecha: document.getElementById('fecha').value,
+        hora: document.getElementById('hora').value,
+        asunto: document.getElementById('asunto').value.trim() || "Recordatorio de reunión"
+      };
+      
+      // Validación adicional de email en cliente
+      if (!validateEmail(datosReunion.email)) {
+        mostrarError("Por favor ingresa un correo electrónico válido");
+        resetButton();
+        return;
+      }
+      
+      // Validación de fecha futura
+      var fechaSeleccionada = new Date(datosReunion.fecha);
+      var hoy = new Date();
+      hoy.setHours(0, 0, 0, 0);
+      
+      if (fechaSeleccionada < hoy) {
+        mostrarError("La fecha de la reunión debe ser hoy o en el futuro");
+        resetButton();
+        return;
+      }
+      
+      // Validación de hora
+      if (!validateTime(datosReunion.hora)) {
+        mostrarError("La hora debe estar entre 08:00 y 20:00");
+        resetButton();
+        return;
+      }
+      
+      // Enviar a Google Apps Script
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success) {
+            // Cerrar loading
+            Swal.close();
+            
+            // Mostrar éxito con animación
+            Swal.fire({
+              icon: 'success',
+              title: '¡Recordatorio enviado!',
+              html: `
+                <div style="text-align: left; margin-top: 20px;">
+                  <p><i class="fas fa-check-circle" style="color: #4CAF50;"></i> ${result.message}</p>
+                  <p><i class="fas fa-envelope" style="color: #5d6852;"></i> Correo enviado a: <strong>${datosReunion.email}</strong></p>
+                  <p style="font-size: 13px; margin-top: 15px; color: #777;">
+                    <i class="fas fa-info-circle"></i> Si no ves el correo, revisa tu carpeta de spam o correo no deseado.
+                  </p>
+                </div>
+              `,
+              showConfirmButton: true,
+              confirmButtonText: 'Aceptar',
+              confirmButtonColor: '#5d6852',
+              customClass: {
+                container: 'custom-swal-container',
+                popup: 'custom-swal-popup',
+                title: 'custom-swal-title',
+                content: 'custom-swal-content',
+                confirmButton: 'custom-swal-confirm'
+              }
+            });
+            
+            // Restablecer formulario
+            form.reset();
+            // Restablecer valores por defecto
+            setDefaultDateTime();
+            
+            // Pequeña animación de éxito en logo
+            document.querySelector(".logo").style.animation = "wiggle 1s ease";
+            setTimeout(() => {
+              document.querySelector(".logo").style.animation = "";
+            }, 1000);
+          } else {
+            mostrarError(result.message || "Ocurrió un error al enviar el recordatorio");
+          }
+          resetButton();
+        })
+        .withFailureHandler(function(error) {
+          mostrarError("Error al procesar la solicitud: " + (error.message || "Por favor intenta nuevamente"));
+          resetButton();
+        })
+        .enviarRecordatorioManual(datosReunion);
+    }
+    
+    function setDefaultDateTime() {
+      // Establecer fecha actual
+      var today = new Date();
+      today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
+      document.getElementById('fecha').value = today.toISOString().split('T')[0];
+      
+      // Establecer hora actual + 1 hora (redondeada a 15 minutos)
+      var now = new Date();
+      now.setHours(now.getHours() + 1);
+      var minutes = Math.ceil(now.getMinutes() / 15) * 15;
+      now.setMinutes(minutes);
+      var hours = now.getHours().toString().padStart(2, '0');
+      minutes = now.getMinutes().toString().padStart(2, '0');
+      document.getElementById('hora').value = `${hours}:${minutes}`;
+    }
+    
+    function resetButton() {
+      var btn = document.getElementById('submitBtn');
+      var btnText = document.getElementById('buttonText');
+      btn.disabled = false;
+      btnText.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Recordatorio';
+    }
+    
+    function mostrarError(message) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: message,
+        confirmButtonColor: '#5d6852',
+        confirmButtonText: 'Entendido',
+        customClass: {
+          container: 'custom-swal-container',
+          popup: 'custom-swal-popup',
+          title: 'custom-swal-title',
+          content: 'custom-swal-content',
+          confirmButton: 'custom-swal-confirm'
+        }
+      });
+    }
+    
+    function validateEmail(email) {
+      var re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(email);
+    }
+    
+    function validateTime(time) {
+      if (!time) return false;
+      var [hours, minutes] = time.split(':').map(Number);
+      return hours >= 8 && hours < 20;
+    }
+    
+    // Agregar eventos de interactividad
+    document.querySelectorAll('input, select').forEach(element => {
+      element.addEventListener('focus', function() {
+        this.parentElement.parentElement.style.transform = 'translateY(-5px)';
+      });
+      
+      element.addEventListener('blur', function() {
+        this.parentElement.parentElement.style.transform = 'translateY(0)';
+      });
+    });
+    
+    // Mensaje de bienvenida
+    function mostrarBienvenida() {
+      Toast.fire({
+        icon: 'info',
+        title: '¡Bienvenido al Sistema de Recordatorios!'
+      });
+    }
+    
+    // Configuración inicial al cargar la página
+    window.onload = function() {
+      // Establecer valores por defecto
+      setDefaultDateTime();
+      
+      // Establecer fecha mínima como hoy
+      var today = new Date();
+      today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
+      document.getElementById('fecha').min = today.toISOString().split('T')[0];
+      
+      // Enfocar el primer campo
+      document.getElementById('nombre').focus();
+      
+      // Verificar permisos
+      verificarPermisos();
+      
+      // Mostrar mensaje de bienvenida después de 500ms
+      setTimeout(mostrarBienvenida, 500);
+    };
+  </script>
+</body>
+</html>
