@@ -98,3 +98,59 @@ function sanitize(input) {
   return HtmlService.createHtmlOutput(input).getContent();
 }
 ```
+## MONITOREO SIMULADO
+1. Modifica tu código para agregar logs estratégicos
+Agrega estas líneas en tus funciones principales (codigo.gs):
+```
+function enviarRecordatorioManual(datosReunion) {
+  console.log("[INFO] Inicio de envío a: ", datosReunion.email);
+  
+  try {
+    // Validación
+    if (!datosReunion.email) {
+      console.warn("[ADVERTENCIA] Email vacío recibido");
+      throw new Error("Email requerido");
+    }
+
+    // Lógica de envío
+    MailApp.sendEmail(...);
+    console.log("[ÉXITO] Email enviado correctamente");
+
+    // Registro en Sheets
+    SpreadsheetApp.openById("ID_HOJA");
+    console.log("[INFO] Registro en hoja completado");
+
+  } catch (error) {
+    console.error("[ERROR CRÍTICO] ", error.message, " - Datos: ", JSON.stringify(datosReunion));
+    throw error;
+  }
+}
+```
+2. Simula escenarios de error
+Crea casos de prueba en pruebas.gs:
+```
+function testErrores() {
+  const casosPrueba = [
+    {nombre: "Ana", email: "", fecha: "2023-12-01", hora: "15:00"}, // Email vacío
+    {nombre: "Carlos", email: "correo_invalido", fecha: "2023-12-01", hora: "25:00"}, // Hora inválida
+    {nombre: "Luisa", email: "luisa@correo.com", fecha: "2020-01-01", hora: "10:00"} // Fecha pasada
+  ];
+
+  casosPrueba.forEach(caso => {
+    console.log("--- Probando caso: ", caso.nombre, "---");
+    enviarRecordatorioManual(caso);
+  });
+}
+```
+3. Ejecuta y captura los logs
+- Ve a Ver > Logs en el editor de Apps Script
+- Ejecuta testErrores()
+- Verás resultados como estos:
+```
+[INFO] Inicio de envío a:  
+[ADVERTENCIA] Email vacío recibido  
+[ERROR CRÍTICO] Email requerido - Datos: {"nombre":"Ana","email":"","fecha":"2023-12-01","hora":"15:00"}  
+
+[INFO] Inicio de envío a: correo_invalido  
+[ERROR CRÍTICO] Formato de email inválido - Datos: {"nombre":"Carlos","email":"correo_invalido"...}  
+```
